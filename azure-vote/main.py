@@ -28,12 +28,14 @@ logger.setLevel(logging.INFO)
 logger.addHandler(AzureLogHandler(
     connection_string='InstrumentationKey=6807e2e3-203c-45de-93e3-62dc850dd1fe;IngestionEndpoint=https://westus-0.in.applicationinsights.azure.com/;LiveEndpoint=https://westus.livediagnostics.monitor.azure.com/;ApplicationId=e37674a2-eb61-4fb4-baff-74b8291756b4')
 )
+logger.addHandler(
+    logging.StreamHandler()
+)
 
 
 # Metrics
 exporter = metrics_exporter.new_metrics_exporter(
     enable_standard_metrics=True,
-    # Nochmal InstrumentationKey=???
     connection_string='InstrumentationKey=6807e2e3-203c-45de-93e3-62dc850dd1fe;IngestionEndpoint=https://westus-0.in.applicationinsights.azure.com/;LiveEndpoint=https://westus.livediagnostics.monitor.azure.com/;ApplicationId=e37674a2-eb61-4fb4-baff-74b8291756b4'
 )
 
@@ -107,11 +109,11 @@ def index():
             r.set(button2,0)
             vote1 = r.get(button1).decode('utf-8')
             properties = {'custom_dimensions': {'Cats Vote': vote1}}
-            logger.warning('Vote for Cat')
+            logger.info('Cats Vote')
 
             vote2 = r.get(button2).decode('utf-8')
             properties = {'custom_dimensions': {'Dogs Vote': vote2}}
-            logger.warning('Vote for Dog')
+            logger.info('Dogs Vote')
 
             return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
 
