@@ -28,10 +28,6 @@ logger.setLevel(logging.INFO)
 logger.addHandler(AzureLogHandler(
     connection_string='InstrumentationKey=6807e2e3-203c-45de-93e3-62dc850dd1fe;IngestionEndpoint=https://westus-0.in.applicationinsights.azure.com/;LiveEndpoint=https://westus.livediagnostics.monitor.azure.com/;ApplicationId=e37674a2-eb61-4fb4-baff-74b8291756b4')
 )
-logger.addHandler(
-    logging.StreamHandler()
-)
-
 
 # Metrics
 exporter = metrics_exporter.new_metrics_exporter(
@@ -92,10 +88,12 @@ def index():
 
         # Get current values
         vote1 = r.get(button1).decode('utf-8')
-        tracer.span(name='Cats Vote')
+        with tracer.span(name='Cats Vote'):
+            pass
 
-        vote2 = r.get(button2).decode('utf-8')
-        tracer.span(name='Dogs Vote')
+        with tracer.span(name='Dogs Vote'):
+            vote2 = r.get(button2).decode('utf-8')
+            pass
 
         # Return index with values
         return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
@@ -109,11 +107,11 @@ def index():
             r.set(button2,0)
             vote1 = r.get(button1).decode('utf-8')
             properties = {'custom_dimensions': {'Cats Vote': vote1}}
-            logger.info('Cats Vote')
+            logger.info('Cats Vote', extra=properties)
 
             vote2 = r.get(button2).decode('utf-8')
             properties = {'custom_dimensions': {'Dogs Vote': vote2}}
-            logger.info('Dogs Vote')
+            logger.info('Dogs Vote', extra=properties)
 
             return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
 
@@ -132,6 +130,6 @@ def index():
 
 if __name__ == "__main__":
     # TODO: Use the statement below when running locally
-    # app.run() 
+    app.run() 
     # TODO: Use the statement below before deployment to VMSS
-    app.run(host='0.0.0.0', threaded=True, debug=True) # remote
+    # app.run(host='0.0.0.0', threaded=True, debug=True) # remote
