@@ -21,7 +21,14 @@ from opencensus.trace.tracer import Tracer
 from opencensus.ext.flask.flask_middleware import FlaskMiddleware
 
 # Logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__) 
+
+logger.setLevel(logging.INFO)
+logger.addHandler(AzureLogHandler(
+    connection_string='InstrumentationKey=6807e2e3-203c-45de-93e3-62dc850dd1fe;IngestionEndpoint=https://westus-0.in.applicationinsights.azure.com/;LiveEndpoint=https://westus.livediagnostics.monitor.azure.com/;ApplicationId=e37674a2-eb61-4fb4-baff-74b8291756b4')
+)
+
 
 # Metrics
 exporter = metrics_exporter.new_metrics_exporter(
@@ -83,9 +90,10 @@ def index():
 
         # Get current values
         vote1 = r.get(button1).decode('utf-8')
-        tracer.span(name='Vote for Cat.')
+        tracer.span(name='Cats Vote')
+
         vote2 = r.get(button2).decode('utf-8')
-        tracer.span(name='Vote for Dog')
+        tracer.span(name='Dogs Vote')
 
         # Return index with values
         return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
@@ -99,11 +107,11 @@ def index():
             r.set(button2,0)
             vote1 = r.get(button1).decode('utf-8')
             properties = {'custom_dimensions': {'Cats Vote': vote1}}
-            logger.info('Vote for Cat')
+            logger.warning('Vote for Cat')
 
             vote2 = r.get(button2).decode('utf-8')
             properties = {'custom_dimensions': {'Dogs Vote': vote2}}
-            logger.info('Vote for Dog')
+            logger.warning('Vote for Dog')
 
             return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
 
